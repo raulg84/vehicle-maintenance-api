@@ -1,0 +1,38 @@
+# OS / Editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+.fleet/
+.zed/
+
+# Laravel core
+/vendor
+/node_modules
+.env
+.env.backup
+.env.production
+
+# Laravel storage & cache
+/storage/*.key
+/storage/logs/*
+/storage/framework/*
+/bootstrap/cache/*.php
+
+# Public build files
+/public/hot
+/public/build
+/public/storage
+
+# Testing / coverage
+.phpunit.result.cache
+.phpunit.cache
+coverage/
+
+# Misc
+*.log
+.phpactor.json
+.auth.json
+Homestead.json
+Homestead.yaml
+.nova/
