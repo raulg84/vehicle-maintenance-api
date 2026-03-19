@@ -3,19 +3,24 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Vehicle;
 use App\Models\User;
+use App\Models\Vehicle;
+use Illuminate\Http\Request;
 
 class VehicleController extends Controller
 {
-   /**
-     * Listar vehículos del usuario autenticado.
+    /**
+     * Listar vehículos del usuario.
      */
-    public function index(Request $request)
+    public function index()
     {
-        //$user = $request->user();
-        $user = \App\Models\User::first();
+        $user = User::first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'No existe ningún usuario en el sistema.'
+            ], 404);
+        }
 
         $vehicles = Vehicle::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
@@ -29,6 +34,14 @@ class VehicleController extends Controller
      */
     public function store(Request $request)
     {
+        $user = User::first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'No existe ningún usuario en el sistema.'
+            ], 404);
+        }
+
         $validated = $request->validate([
             'alias' => 'nullable|string|max:255',
             'make' => 'required|string|max:100',
@@ -41,8 +54,7 @@ class VehicleController extends Controller
 
         $vehicle = Vehicle::create([
             ...$validated,
-            //'user_id' => $request->user()->id,
-            'user_id' => 1,
+            'user_id' => $user->id,
             'active' => true,
         ]);
 
@@ -50,26 +62,97 @@ class VehicleController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Mostrar un vehículo concreto.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $user = User::first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'No existe ningún usuario en el sistema.'
+            ], 404);
+        }
+
+        $vehicle = Vehicle::where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json([
+                'message' => 'Vehículo no encontrado'
+            ], 404);
+        }
+
+        return response()->json($vehicle);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualizar un vehículo.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $user = User::first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'No existe ningún usuario en el sistema.'
+            ], 404);
+        }
+
+        $vehicle = Vehicle::where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json([
+                'message' => 'Vehículo no encontrado'
+            ], 404);
+        }
+
+        $validated = $request->validate([
+            'alias' => 'nullable|string|max:255',
+            'make' => 'sometimes|string|max:100',
+            'model' => 'sometimes|string|max:100',
+            'year' => 'sometimes|integer|min:1900|max:' . date('Y'),
+            'powertrain_type' => 'sometimes|in:combustion,hybrid,electric',
+            'current_mileage' => 'sometimes|integer|min:0',
+            'in_service_date' => 'nullable|date',
+            'active' => 'sometimes|boolean',
+        ]);
+
+        $vehicle->update($validated);
+
+        return response()->json($vehicle);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Eliminar un vehículo.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $user = User::first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'No existe ningún usuario en el sistema.'
+            ], 404);
+        }
+
+        $vehicle = Vehicle::where('id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json([
+                'message' => 'Vehículo no encontrado'
+            ], 404);
+        }
+
+        $vehicle->delete();
+
+        return response()->json([
+            'message' => 'Vehículo eliminado correctamente'
+        ]);
     }
 }
