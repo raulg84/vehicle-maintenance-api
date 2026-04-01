@@ -28,19 +28,15 @@ class VehicleController extends Controller
 
         return response()->json($vehicles);
     }
+    
+    
 
     /**
      * Crear un nuevo vehículo.
      */
-    public function store(Request $request)
+     public function store(Request $request)
     {
-        $user = User::first();
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'No existe ningún usuario en el sistema.'
-            ], 404);
-        }
+        $user = $request->user();
 
         $validated = $request->validate([
             'alias' => 'nullable|string|max:255',
@@ -50,12 +46,13 @@ class VehicleController extends Controller
             'powertrain_type' => 'required|in:combustion,hybrid,electric',
             'current_mileage' => 'required|integer|min:0',
             'in_service_date' => 'nullable|date',
+            'active' => 'sometimes|boolean',
         ]);
 
         $vehicle = Vehicle::create([
             ...$validated,
             'user_id' => $user->id,
-            'active' => true,
+            'active' => $validated['active'] ?? true,
         ]);
 
         return response()->json($vehicle, 201);
@@ -64,15 +61,9 @@ class VehicleController extends Controller
     /**
      * Mostrar un vehículo concreto.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $user = User::first();
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'No existe ningún usuario en el sistema.'
-            ], 404);
-        }
+        $user = $request->user();
 
         $vehicle = Vehicle::where('id', $id)
             ->where('user_id', $user->id)
@@ -87,18 +78,13 @@ class VehicleController extends Controller
         return response()->json($vehicle);
     }
 
+
     /**
      * Actualizar un vehículo.
      */
-    public function update(Request $request, $id)
+     public function update(Request $request, $id)
     {
-        $user = User::first();
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'No existe ningún usuario en el sistema.'
-            ], 404);
-        }
+        $user = $request->user();
 
         $vehicle = Vehicle::where('id', $id)
             ->where('user_id', $user->id)
@@ -129,15 +115,9 @@ class VehicleController extends Controller
     /**
      * Eliminar un vehículo.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $user = User::first();
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'No existe ningún usuario en el sistema.'
-            ], 404);
-        }
+        $user = $request->user();
 
         $vehicle = Vehicle::where('id', $id)
             ->where('user_id', $user->id)
