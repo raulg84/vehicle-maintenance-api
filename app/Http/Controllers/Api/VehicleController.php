@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Vehicle;
 use Illuminate\Http\Request;
+use App\Services\MaintenanceStatusService;
 
 class VehicleController extends Controller
 {
@@ -14,7 +15,9 @@ class VehicleController extends Controller
      */
     public function index()
     {
-        $user = User::first();
+        // $user = $request->user();
+                $user = User::first();
+
 
         if (!$user) {
             return response()->json([
@@ -36,7 +39,9 @@ class VehicleController extends Controller
      */
      public function store(Request $request)
     {
-        $user = $request->user();
+        // $user = $request->user();
+                $user = User::first();
+
 
         $validated = $request->validate([
             'alias' => 'nullable|string|max:255',
@@ -63,7 +68,9 @@ class VehicleController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $user = $request->user();
+        // $user = $request->user();
+                $user = User::first();
+
 
         $vehicle = Vehicle::where('id', $id)
             ->where('user_id', $user->id)
@@ -84,7 +91,9 @@ class VehicleController extends Controller
      */
      public function update(Request $request, $id)
     {
-        $user = $request->user();
+        // $user = $request->user();
+                $user = User::first();
+
 
         $vehicle = Vehicle::where('id', $id)
             ->where('user_id', $user->id)
@@ -117,7 +126,9 @@ class VehicleController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $user = $request->user();
+        // $user = $request->user();
+                $user = User::first();
+
 
         $vehicle = Vehicle::where('id', $id)
             ->where('user_id', $user->id)
@@ -134,5 +145,17 @@ class VehicleController extends Controller
         return response()->json([
             'message' => 'Vehículo eliminado correctamente'
         ]);
+    }
+
+     /**
+     * Obtener el estado de mantenimiento de un vehículo.
+     */
+    public function maintenanceStatus($id, MaintenanceStatusService $maintenanceStatusService)
+    {
+        $vehicle = Vehicle::findOrFail($id);
+
+        return response()->json(
+            $maintenanceStatusService->buildVehicleStatus($vehicle)
+        );
     }
 }

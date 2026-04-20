@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\Maintenance;
 
 class Vehicle extends Model
 {
@@ -49,11 +50,10 @@ class Vehicle extends Model
     }
 
     /**
-     * Relación: un vehículo puede tener muchos mantenimientos.
-     * Ajustaremos el modelo MaintenanceRecord más adelante.
+     * Relación: un vehículo puede tener varios mantenimientos.
      */
-    /**public function maintenanceRecords(): HasMany
+    public function maintenanceRecords(): HasMany
     {
         return $this->hasMany(MaintenanceRecord::class);
-    }*/
+    }
 }

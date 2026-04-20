@@ -28,12 +28,15 @@ class AuthController extends Controller
             'password' => $validated['password'],
         ]);
 
+         $token = $user->createToken('insomnia-token')->plainTextToken;
+
         // Login automático tras registro
-        Auth::login($user);
+        // Auth::login($user);
 
         return response()->json([
             'message' => 'Usuario registrado correctamente',
-            'user' => $user
+            'user' => $user,
+            'token' => $token
         ], 201);
     }
 
