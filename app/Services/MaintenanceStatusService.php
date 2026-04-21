@@ -29,6 +29,11 @@ class MaintenanceStatusService
             $ruleStatuses[] = $this->evaluateRule($vehicle, $rule);
         }
 
+        $ruleStatuses = collect($ruleStatuses)
+        ->sortBy('priority')
+        ->values()
+        ->all();
+
         $globalStatus = $this->calculateGlobalStatus($ruleStatuses);
         $summary = $this->buildSummary($globalStatus);
         $nextAction = $this->buildNextAction($ruleStatuses, $globalStatus);
@@ -44,6 +49,14 @@ class MaintenanceStatusService
 
     protected function evaluateRule(Vehicle $vehicle, MaintenanceRule $rule): array
     {
+
+        $priorityMap = [
+            'overdue' => 1,
+            'upcoming' => 2,
+            'pending' => 3,
+            'ok' => 4,
+        ];
+
         $lastMaintenance = Maintenance::query()
             ->where('vehicle_id', $vehicle->id)
             ->where('maintenance_rule_id', $rule->id)
@@ -108,6 +121,7 @@ class MaintenanceStatusService
             'maintenance_key' => $rule->maintenance_key,
             'status' => $status,
             'status_label' => $statusLabel,
+            'priority' => $priorityMap[$status] ?? 99,
             'last_maintenance_date' => $lastMaintenance->performed_at?->toDateString(),
             'last_maintenance_km' => $lastMaintenance->mileage_at_service,
             'current_vehicle_km' => $vehicle->current_mileage,
@@ -121,17 +135,10 @@ class MaintenanceStatusService
      */
     protected function calculateGlobalStatus(array $ruleStatuses): string
     {
-        if (collect($ruleStatuses)->contains(fn ($rule) => $rule['status'] === 'overdue')) {
-            return 'overdue';
-        }
+        $first = collect($ruleStatuses)->first();
 
-        if (collect($ruleStatuses)->contains(fn ($rule) => $rule['status'] === 'upcoming')) {
-            return 'upcoming';
-        }
-
-        return 'ok';
+        return $first['status'] ?? 'ok';
     }
-
     /**
      * Construir un resumen amigable del estado global.
      */
@@ -157,43 +164,37 @@ class MaintenanceStatusService
      * Construir la próxima acción recomendada basada en los estados de las reglas.
      */
     protected function buildNextAction(array $ruleStatuses, string $globalStatus): array
-    {
-        $priorityOrder = [
-            'overdue' => 1,
-            'upcoming' => 2,
-            'ok' => 3,
-        ];
+{
+    $candidate = collect($ruleStatuses)->first(); // ya viene ordenado
 
-        $candidate = collect($ruleStatuses)
-            ->sortBy(fn ($rule) => $priorityOrder[$rule['status']] ?? 99)
-            ->first();
-
-        if (!$candidate) {
-            return [
-                'rule_id' => null,
-                'maintenance_key' => null,
-                'title' => 'Sin acciones urgentes',
-                'message' => 'No hay acciones recomendadas en este momento.',
-            ];
-        }
-
-        $title = match ($candidate['status']) {
-            'overdue' => 'Revisar ' . $candidate['name'],
-            'upcoming' => 'Próxima revisión de ' . $candidate['name'],
-            default => 'Sin acciones urgentes',
-        };
-
-        $message = match ($candidate['status']) {
-            'overdue' => 'Se han superado los intervalos recomendados para esta operación.',
-            'upcoming' => 'Se aproxima el intervalo recomendado para esta operación.',
-            default => 'No se detectan acciones inmediatas recomendadas.',
-        };
-
+    if (!$candidate) {
         return [
-            'rule_id' => $candidate['rule_id'],
-            'maintenance_key' => $candidate['maintenance_key'],
-            'title' => $title,
-            'message' => $message,
+            'rule_id' => null,
+            'maintenance_key' => null,
+            'title' => 'Sin acciones urgentes',
+            'message' => 'No hay acciones recomendadas.',
         ];
     }
+
+    $title = match ($candidate['status']) {
+        'overdue' => 'Revisar ' . $candidate['name'],
+        'upcoming' => 'Próxima revisión de ' . $candidate['name'],
+        'pending' => 'Registrar mantenimiento de ' . $candidate['name'],
+        default => 'Sin acciones urgentes',
+    };
+
+    $message = match ($candidate['status']) {
+        'overdue' => 'Se han superado los intervalos recomendados.',
+        'upcoming' => 'Se aproxima el intervalo recomendado.',
+        'pending' => 'No existe historial de mantenimiento para esta regla.',
+        default => 'No se detectan acciones inmediatas.',
+    };
+
+    return [
+        'rule_id' => $candidate['rule_id'],
+        'maintenance_key' => $candidate['maintenance_key'],
+        'title' => $title,
+        'message' => $message,
+    ];
+}
 }
