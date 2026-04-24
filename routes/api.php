@@ -9,7 +9,8 @@ use App\Http\Controllers\Api\MaintenanceRuleController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
- Route::get('/vehicles', [VehicleController::class, 'index']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/vehicles', [VehicleController::class, 'index']);
     Route::post('/vehicles', [VehicleController::class, 'store']);
     Route::get('/vehicles/{id}', [VehicleController::class, 'show']);
     Route::put('/vehicles/{id}', [VehicleController::class, 'update']);
@@ -22,11 +23,13 @@ Route::post('/login', [AuthController::class, 'login']);
     Route::put('/maintenances/{id}', [MaintenanceController::class, 'update']);
     Route::delete('/maintenances/{id}', [MaintenanceController::class, 'destroy']);
 
-    Route::get('/maintenance-rules', [MaintenanceRuleController::class, 'index']);
-
-Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
+});
 
-   
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/maintenance-rules', [MaintenanceRuleController::class, 'index']);
+    Route::post('/maintenance-rules', [MaintenanceRuleController::class, 'store']);
+    Route::get('/maintenance-rules/{id}', [MaintenanceRuleController::class, 'show']);
+    Route::put('/maintenance-rules/{id}', [MaintenanceRuleController::class, 'update']);
 });

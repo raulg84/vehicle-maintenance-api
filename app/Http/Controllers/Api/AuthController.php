@@ -26,17 +26,19 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => $validated['password'],
+            'role' => 'user',
         ]);
 
-         $token = $user->createToken('insomnia-token')->plainTextToken;
+
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         // Login automático tras registro
-        // Auth::login($user);
+        Auth::login($user);
 
         return response()->json([
             'message' => 'Usuario registrado correctamente',
+            'token' => $token,
             'user' => $user,
-            'token' => $token
         ], 201);
     }
 
@@ -45,23 +47,25 @@ class AuthController extends Controller
      */
     public function login(Request $request)
     {
-        $credentials = $request->validate([
+        $validated = $request->validate([
             'email' => ['required', 'email'],
-            'password' => ['required'],
+            'password' => ['required', 'string'],
         ]);
 
-        if (!Auth::attempt($credentials)) {
+        $user = User::where('email', $validated['email'])->first();
+
+        if (!$user || !Hash::check($validated['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['Las credenciales no son correctas.'],
             ]);
         }
 
-        // Regenerar sesión (seguridad)
-        $request->session()->regenerate();
+        $token = $user->createToken('auth-token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login correcto',
-            'user' => Auth::user()
+            'token' => $token,
+            'user' => $user,
         ]);
     }
 
@@ -70,13 +74,10 @@ class AuthController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::guard('web')->logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
+        $request->user()->currentAccessToken()?->delete();
 
         return response()->json([
-            'message' => 'Logout correcto'
+            'message' => 'Logout correcto',
         ]);
     }
 

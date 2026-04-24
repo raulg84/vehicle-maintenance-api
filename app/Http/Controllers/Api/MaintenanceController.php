@@ -15,9 +15,7 @@ class MaintenanceController extends Controller
      */
     public function index(Request $request)
     {
-        // $user = $request->user();
-        $user = User::first();
-
+        $user = $request->user();
 
         $query = Maintenance::whereHas('vehicle', function ($q) use ($user) {
             $q->where('user_id', $user->id);
@@ -37,9 +35,7 @@ class MaintenanceController extends Controller
      */
     public function store(Request $request)
     {
-        // $user = $request->user();
-                $user = User::first();
-
+        $user = $request->user();
 
         $validated = $request->validate([
             'vehicle_id' => ['required', 'integer', 'exists:vehicles,id'],
@@ -71,9 +67,7 @@ class MaintenanceController extends Controller
      */
     public function show(Request $request, $id)
     {
-        // $user = $request->user();
-                $user = User::first();
-
+        $user = $request->user();
 
         $maintenance = Maintenance::where('id', $id)
             ->whereHas('vehicle', function ($q) use ($user) {
@@ -95,9 +89,7 @@ class MaintenanceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // $user = $request->user();
-                $user = User::first();
-
+        $user = $request->user();
 
         $maintenance = Maintenance::where('id', $id)
             ->whereHas('vehicle', function ($q) use ($user) {
@@ -143,9 +135,7 @@ class MaintenanceController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        // $user = $request->user();
-                $user = User::first();
-
+        $user = $request->user();
 
         $maintenance = Maintenance::where('id', $id)
             ->whereHas('vehicle', function ($q) use ($user) {

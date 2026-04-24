@@ -13,17 +13,9 @@ class VehicleController extends Controller
     /**
      * Listar vehículos del usuario.
      */
-    public function index()
+    public function index(Request $request)
     {
-        // $user = $request->user();
-                $user = User::first();
-
-
-        if (!$user) {
-            return response()->json([
-                'message' => 'No existe ningún usuario en el sistema.'
-            ], 404);
-        }
+        $user = $request->user();
 
         $vehicles = Vehicle::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
@@ -31,17 +23,15 @@ class VehicleController extends Controller
 
         return response()->json($vehicles);
     }
-    
-    
+
+
 
     /**
      * Crear un nuevo vehículo.
      */
-     public function store(Request $request)
+    public function store(Request $request)
     {
-        // $user = $request->user();
-                $user = User::first();
-
+        $user = $request->user();
 
         $validated = $request->validate([
             'alias' => 'nullable|string|max:255',
@@ -68,9 +58,7 @@ class VehicleController extends Controller
      */
     public function show(Request $request, $id)
     {
-        // $user = $request->user();
-                $user = User::first();
-
+        $user = $request->user();
 
         $vehicle = Vehicle::where('id', $id)
             ->where('user_id', $user->id)
@@ -89,11 +77,9 @@ class VehicleController extends Controller
     /**
      * Actualizar un vehículo.
      */
-     public function update(Request $request, $id)
+    public function update(Request $request, $id)
     {
-        // $user = $request->user();
-                $user = User::first();
-
+        $user = $request->user();
 
         $vehicle = Vehicle::where('id', $id)
             ->where('user_id', $user->id)
@@ -126,9 +112,7 @@ class VehicleController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        // $user = $request->user();
-                $user = User::first();
-
+        $user = $request->user();
 
         $vehicle = Vehicle::where('id', $id)
             ->where('user_id', $user->id)
@@ -147,7 +131,7 @@ class VehicleController extends Controller
         ]);
     }
 
-     /**
+    /**
      * Obtener el estado de mantenimiento de un vehículo.
      */
     public function maintenanceStatus($id, MaintenanceStatusService $maintenanceStatusService)
