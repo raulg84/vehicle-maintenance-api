@@ -54,6 +54,6 @@ class Vehicle extends Model
      */
     public function maintenanceRecords(): HasMany
     {
-        return $this->hasMany(MaintenanceRecord::class);
+        return $this->hasMany(Maintenance::class);
     }
 }
