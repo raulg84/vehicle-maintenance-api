@@ -23,6 +23,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/maintenances/{id}', [MaintenanceController::class, 'update']);
     Route::delete('/maintenances/{id}', [MaintenanceController::class, 'destroy']);
 
+    Route::get('/maintenance-rules/active', [MaintenanceRuleController::class, 'active']);
+
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', [AuthController::class, 'user']);
 });
@@ -32,4 +34,5 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::post('/maintenance-rules', [MaintenanceRuleController::class, 'store']);
     Route::get('/maintenance-rules/{id}', [MaintenanceRuleController::class, 'show']);
     Route::put('/maintenance-rules/{id}', [MaintenanceRuleController::class, 'update']);
+    Route::patch('/maintenance-rules/{id}/toggle', [MaintenanceRuleController::class, 'toggle']);
 });
