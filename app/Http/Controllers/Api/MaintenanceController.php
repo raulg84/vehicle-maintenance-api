@@ -59,6 +59,14 @@ class MaintenanceController extends Controller
 
         $maintenance = Maintenance::create($validated);
 
+        $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+
+        if ($maintenance->mileage_at_service > $vehicle->current_mileage) {
+            $vehicle->update([
+                'current_mileage' => $maintenance->mileage_at_service,
+            ]);
+        }
+
         return response()->json($maintenance, 201);
     }
 
@@ -126,6 +134,14 @@ class MaintenanceController extends Controller
         }
 
         $maintenance->update($validated);
+
+        $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+
+        if ($maintenance->mileage_at_service > $vehicle->current_mileage) {
+            $vehicle->update([
+                'current_mileage' => $maintenance->mileage_at_service,
+            ]);
+        }
 
         return response()->json($maintenance);
     }
