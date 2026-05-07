@@ -37,7 +37,6 @@ class MaintenanceStatusService
         $globalStatus = $this->calculateGlobalStatus($ruleStatuses);
         $summary = $this->buildSummary($globalStatus);
         $nextAction = $this->buildNextAction($ruleStatuses, $globalStatus);
-
         return [
             'vehicle_id' => $vehicle->id,
             'vehicle_status' => $globalStatus,
@@ -71,11 +70,13 @@ class MaintenanceStatusService
                 'maintenance_key' => $rule->maintenance_key,
                 'status' => 'pending',
                 'status_label' => 'Pendiente',
+                'priority' => $priorityMap['pending'],
                 'last_maintenance_date' => null,
                 'last_maintenance_km' => null,
                 'current_vehicle_km' => $vehicle->current_mileage,
                 'remaining_km' => null,
                 'remaining_days' => null,
+                'progress' => 0,
             ];
         }
 
@@ -90,11 +91,18 @@ class MaintenanceStatusService
             ? $rule->interval_days - $daysSinceLast
             : null;
 
-        $isOverdueByKm = $rule->interval_km !== null && $kmSinceLast >= $rule->interval_km;
-        $isOverdueByDays = $rule->interval_days !== null && $daysSinceLast >= $rule->interval_days;
+        $isOverdueByKm = $remainingKm !== null && $remainingKm <= 0;
+        $isOverdueByDays = $remainingDays !== null && $remainingDays <= 0;
 
-        $isUpcomingByKm = false;
-        $isUpcomingByDays = false;
+        $isUpcomingByKm = $rule->warning_km !== null
+            && $remainingKm !== null
+            && $remainingKm <= $rule->warning_km
+            && $remainingKm > 0;
+
+        $isUpcomingByDays = $rule->warning_days !== null
+            && $remainingDays !== null
+            && $remainingDays <= $rule->warning_days
+            && $remainingDays > 0;
 
         if ($rule->warning_km !== null && $rule->interval_km !== null) {
             $isUpcomingByKm = $kmSinceLast >= ($rule->interval_km - $rule->warning_km);
@@ -159,9 +167,21 @@ class MaintenanceStatusService
      */
     protected function calculateGlobalStatus(array $ruleStatuses): string
     {
-        $first = collect($ruleStatuses)->first();
+        $statuses = collect($ruleStatuses)->pluck('status');
 
-        return $first['status'] ?? 'ok';
+        if ($statuses->contains('overdue')) {
+            return 'overdue';
+        }
+
+        if ($statuses->contains('upcoming')) {
+            return 'upcoming';
+        }
+
+        if ($statuses->contains('pending')) {
+            return 'pending';
+        }
+
+        return 'ok';
     }
     /**
      * Construir un resumen amigable del estado global.
@@ -189,7 +209,17 @@ class MaintenanceStatusService
      */
     protected function buildNextAction(array $ruleStatuses, string $globalStatus): array
     {
-        $candidate = collect($ruleStatuses)->first(); // ya viene ordenado
+        $candidate = collect($ruleStatuses)
+            ->sortBy(function ($rule) {
+                return match ($rule['status']) {
+                    'overdue' => 1,
+                    'upcoming' => 2,
+                    'pending' => 3,
+                    'ok' => 4,
+                    default => 99,
+                };
+            })
+            ->first();
 
         if (!$candidate) {
             return [

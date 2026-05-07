@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Models\Maintenance;
 use Illuminate\Http\Request;
 use App\Services\MaintenanceStatusService;
 
@@ -101,6 +102,18 @@ class VehicleController extends Controller
             'in_service_date' => 'nullable|date',
             'active' => 'sometimes|boolean',
         ]);
+
+        $maxMaintenanceMileage = Maintenance::where('vehicle_id', $vehicle->id)
+            ->max('mileage_at_service');
+
+        if (
+            $maxMaintenanceMileage !== null &&
+            $validated['current_mileage'] < $maxMaintenanceMileage
+        ) {
+            return response()->json([
+                'message' => 'El kilometraje actual no puede ser inferior al mayor kilometraje registrado en los mantenimientos.',
+            ], 422);
+        }
 
         $vehicle->update($validated);
 
