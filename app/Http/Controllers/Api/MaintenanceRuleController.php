@@ -78,8 +78,8 @@ class MaintenanceRuleController extends Controller
 
             'applies_to_powertrain' => 'required|in:all,combustion,hybrid,electric',
 
-            'interval_km' => 'nullable|integer|min:0',
-            'interval_days' => 'nullable|integer|min:0',
+            'interval_km' => 'nullable|integer|min:1',
+            'interval_days' => 'nullable|integer|min:1',
 
             'warning_km' => 'nullable|integer|min:0',
             'warning_days' => 'nullable|integer|min:0',
@@ -87,6 +87,15 @@ class MaintenanceRuleController extends Controller
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
         ]);
+
+        if (
+            is_null($validated['interval_km']) &&
+            is_null($validated['interval_days'])
+        ) {
+            return response()->json([
+                'message' => 'La regla debe definir al menos un intervalo en kilómetros o días.',
+            ], 422);
+        }
 
         $rule = MaintenanceRule::create($validated);
 
@@ -107,8 +116,8 @@ class MaintenanceRuleController extends Controller
 
             'applies_to_powertrain' => 'required|in:all,combustion,hybrid,electric',
 
-            'interval_km' => 'nullable|integer|min:0',
-            'interval_days' => 'nullable|integer|min:0',
+            'interval_km' => 'nullable|integer|min:1',
+            'interval_days' => 'nullable|integer|min:1',
 
             'warning_km' => 'nullable|integer|min:0',
             'warning_days' => 'nullable|integer|min:0',
@@ -116,6 +125,15 @@ class MaintenanceRuleController extends Controller
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0',
         ]);
+
+        if (
+            is_null($validated['interval_km']) &&
+            is_null($validated['interval_days'])
+        ) {
+            return response()->json([
+                'message' => 'La regla debe definir al menos un intervalo en kilómetros o días.',
+            ], 422);
+        }
 
         $rule->update($validated);
 
