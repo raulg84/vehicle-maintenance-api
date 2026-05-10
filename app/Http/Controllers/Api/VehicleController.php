@@ -40,7 +40,7 @@ class VehicleController extends Controller
             'model' => 'required|string|max:100',
             'year' => 'required|integer|min:1900|max:' . date('Y'),
             'powertrain_type' => 'required|in:combustion,hybrid,electric',
-            'current_mileage' => 'required|integer|min:0',
+            'current_mileage' => 'required|integer|min:0|max:2000000',
             'in_service_date' => 'nullable|date',
             'active' => 'sometimes|boolean',
         ]);
@@ -98,7 +98,7 @@ class VehicleController extends Controller
             'model' => 'sometimes|string|max:100',
             'year' => 'sometimes|integer|min:1900|max:' . date('Y'),
             'powertrain_type' => 'sometimes|in:combustion,hybrid,electric',
-            'current_mileage' => 'sometimes|integer|min:0',
+            'current_mileage' => 'required|integer|min:0|max:2000000',
             'in_service_date' => 'nullable|date',
             'active' => 'sometimes|boolean',
         ]);
