@@ -8,27 +8,10 @@ use App\Models\MaintenanceRule;
 
 class MaintenanceRuleController extends Controller
 {
+
     /**
-     * Listar reglas de mantenimiento activas, opcionalmente filtrando por tipo de tren motriz.
+     * Listar todas las reglas de mantenimiento.
      */
-    // public function index(Request $request)
-    // {
-    //     $powertrainType = $request->query('powertrain_type');
-
-    //     $query = MaintenanceRule::query()
-    //         ->where('is_active', true)
-    //         ->orderBy('sort_order');
-
-    //     if ($powertrainType) {
-    //         $query->where(function ($q) use ($powertrainType) {
-    //             $q->where('applies_to_powertrain', 'all')
-    //                 ->orWhere('applies_to_powertrain', $powertrainType);
-    //         });
-    //     }
-
-    //     return response()->json($query->get());
-    // }
-
     public function index()
     {
         return response()->json(
@@ -89,13 +72,16 @@ class MaintenanceRuleController extends Controller
         ]);
 
         if (
-            is_null($validated['interval_km']) &&
-            is_null($validated['interval_days'])
+            empty($validated['interval_km']) &&
+            empty($validated['interval_days'])
         ) {
             return response()->json([
                 'message' => 'La regla debe definir al menos un intervalo en kilómetros o días.',
             ], 422);
         }
+
+        $validated['is_active'] = $validated['is_active'] ?? true;
+        $validated['sort_order'] = $validated['sort_order'] ?? 0;
 
         $rule = MaintenanceRule::create($validated);
 
@@ -127,8 +113,8 @@ class MaintenanceRuleController extends Controller
         ]);
 
         if (
-            is_null($validated['interval_km']) &&
-            is_null($validated['interval_days'])
+            empty($validated['interval_km']) &&
+            empty($validated['interval_days'])
         ) {
             return response()->json([
                 'message' => 'La regla debe definir al menos un intervalo en kilómetros o días.',

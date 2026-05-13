@@ -2,18 +2,18 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\MaintenanceRule;
 
 class MaintenanceRuleSeeder extends Seeder
 {
     /**
-     * Run the database seeds.
+     * Reglas de mantenimiento predefinidas para vehículos de combustión y eléctricas.
      */
     public function run(): void
     {
-        MaintenanceRule::insert([
+        MaintenanceRule::updateOrCreate(
+            ['maintenance_key' => 'oil_change'], // clave única para evitar duplicados
             [
                 'name' => 'Cambio de aceite',
                 'maintenance_key' => 'oil_change',
@@ -26,7 +26,12 @@ class MaintenanceRuleSeeder extends Seeder
                 'sort_order' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
+                'is_active' => true,
+            ]
+        );
+
+        MaintenanceRule::updateOrCreate(
+            ['maintenance_key' => 'air_filter'], // clave única para evitar duplicados
             [
                 'name' => 'Filtro de aire',
                 'maintenance_key' => 'air_filter',
@@ -39,7 +44,12 @@ class MaintenanceRuleSeeder extends Seeder
                 'sort_order' => 2,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
+                'is_active' => true,
+            ]
+        );
+
+        MaintenanceRule::updateOrCreate(
+            ['maintenance_key' => 'cabin_filter'], // clave única para evitar duplicados
             [
                 'name' => 'Filtro habitáculo',
                 'maintenance_key' => 'cabin_filter',
@@ -52,7 +62,12 @@ class MaintenanceRuleSeeder extends Seeder
                 'sort_order' => 3,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
+                'is_active' => true,
+            ]
+        );
+
+        MaintenanceRule::updateOrCreate(
+            ['maintenance_key' => 'brake_check'], // clave única para evitar duplicados
             [
                 'name' => 'Revisión de frenos',
                 'maintenance_key' => 'brake_check',
@@ -65,7 +80,12 @@ class MaintenanceRuleSeeder extends Seeder
                 'sort_order' => 4,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
+                'is_active' => true,
+            ]
+        );
+
+        MaintenanceRule::updateOrCreate(
+            ['maintenance_key' => 'general_check'], // clave única para evitar duplicados
             [
                 'name' => 'Revisión general',
                 'maintenance_key' => 'general_check',
@@ -78,7 +98,8 @@ class MaintenanceRuleSeeder extends Seeder
                 'sort_order' => 5,
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-        ]);
+                'is_active' => true,
+            ]
+        );
     }
 }

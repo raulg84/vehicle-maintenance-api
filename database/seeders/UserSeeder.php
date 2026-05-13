@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
     {
         // USUARIO ADMIN
         User::updateOrCreate(
-            ['email' => 'admin@tfm.local'], // clave única
+            ['email' => 'admin@example.com'], // clave única
             [
                 'name' => 'Administrador',
                 'password' => 'Admin1234!', // El mutador de User se encargará de hashear la contraseña
@@ -23,12 +23,12 @@ class UserSeeder extends Seeder
         );
 
         $this->command->info('Usuario administrador creado o actualizado correctamente.');
-        $this->command->info('Email: admin@tfm.local');
+        $this->command->info('Email: admin@example.com');
         $this->command->info('Password: Admin1234!');
 
-         // USER NORMAL
+        // USER NORMAL
         User::updateOrCreate(
-            ['email' => 'user@tfm.local'],
+            ['email' => 'user@example.com'],
             [
                 'name' => 'Usuario Demo',
                 'password' => 'User1234!',
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
         );
 
         $this->command->info('Usuario normal creado o actualizado correctamente.');
-        $this->command->info('Email: user@tfm.local');
+        $this->command->info('Email: user@example.com');
         $this->command->info('Password: User1234!');
     }
 }

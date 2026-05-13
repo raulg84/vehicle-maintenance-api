@@ -98,21 +98,24 @@ class VehicleController extends Controller
             'model' => 'sometimes|string|max:100',
             'year' => 'sometimes|integer|min:1900|max:' . date('Y'),
             'powertrain_type' => 'sometimes|in:combustion,hybrid,electric',
-            'current_mileage' => 'required|integer|min:0|max:2000000',
+            'current_mileage' => 'sometimes|integer|min:0|max:2000000',
             'in_service_date' => 'nullable|date',
             'active' => 'sometimes|boolean',
         ]);
 
-        $maxMaintenanceMileage = Maintenance::where('vehicle_id', $vehicle->id)
-            ->max('mileage_at_service');
+        if (array_key_exists('current_mileage', $validated)) {
 
-        if (
-            $maxMaintenanceMileage !== null &&
-            $validated['current_mileage'] < $maxMaintenanceMileage
-        ) {
-            return response()->json([
-                'message' => 'El kilometraje actual no puede ser inferior al mayor kilometraje registrado en los mantenimientos.',
-            ], 422);
+            $maxMaintenanceMileage = Maintenance::where('vehicle_id', $vehicle->id)
+                ->max('mileage_at_service');
+
+            if (
+                $maxMaintenanceMileage !== null &&
+                $validated['current_mileage'] < $maxMaintenanceMileage
+            ) {
+                return response()->json([
+                    'message' => 'El kilometraje actual no puede ser inferior al mayor kilometraje registrado en los mantenimientos.',
+                ], 422);
+            }
         }
 
         $vehicle->update($validated);
@@ -147,9 +150,17 @@ class VehicleController extends Controller
     /**
      * Obtener el estado de mantenimiento de un vehículo.
      */
-    public function maintenanceStatus($id, MaintenanceStatusService $maintenanceStatusService)
+    public function maintenanceStatus(Request $request, $id, MaintenanceStatusService $maintenanceStatusService)
     {
-        $vehicle = Vehicle::findOrFail($id);
+        $vehicle = Vehicle::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->first();
+
+        if (!$vehicle) {
+            return response()->json([
+                'message' => 'Vehículo no encontrado'
+            ], 404);
+        }
 
         return response()->json(
             $maintenanceStatusService->buildVehicleStatus($vehicle)

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Maintenance;
 use App\Models\Vehicle;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class MaintenanceController extends Controller
@@ -42,7 +41,7 @@ class MaintenanceController extends Controller
             'maintenance_rule_id' => ['nullable', 'integer', 'exists:maintenance_rules,id'],
             'maintenance_type' => ['required', 'string', 'max:255'],
             'performed_at' => ['required', 'date'],
-            'mileage_at_service' => ['required', 'integer', 'min:0'],
+            'mileage_at_service' => ['required', 'integer', 'min:0', 'max:2000000'],
             'cost' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
         ]);
@@ -58,8 +57,6 @@ class MaintenanceController extends Controller
         }
 
         $maintenance = Maintenance::create($validated);
-
-        $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
 
         if ($maintenance->mileage_at_service > $vehicle->current_mileage) {
             $vehicle->update([
@@ -113,10 +110,10 @@ class MaintenanceController extends Controller
 
         $validated = $request->validate([
             'vehicle_id' => ['sometimes', 'integer', 'exists:vehicles,id'],
-            'maintenance_rule_id' => ['nullable', 'integer'],
+            'maintenance_rule_id' => ['nullable', 'integer', 'exists:maintenance_rules,id'],
             'maintenance_type' => ['sometimes', 'string', 'max:255'],
             'performed_at' => ['sometimes', 'date'],
-            'mileage_at_service' => ['sometimes', 'integer', 'min:0'],
+            'mileage_at_service' => ['sometimes', 'integer', 'min:0', 'max:2000000'],
             'cost' => ['nullable', 'numeric', 'min:0'],
             'notes' => ['nullable', 'string'],
         ]);
@@ -135,7 +132,7 @@ class MaintenanceController extends Controller
 
         $maintenance->update($validated);
 
-        $vehicle = Vehicle::findOrFail($validated['vehicle_id']);
+        $vehicle = $maintenance->vehicle;
 
         if ($maintenance->mileage_at_service > $vehicle->current_mileage) {
             $vehicle->update([
