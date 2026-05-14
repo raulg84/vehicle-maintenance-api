@@ -25,19 +25,5 @@ class UserSeeder extends Seeder
         $this->command->info('Usuario administrador creado o actualizado correctamente.');
         $this->command->info('Email: admin@example.com');
         $this->command->info('Password: Admin1234!');
-
-        // USER NORMAL
-        User::updateOrCreate(
-            ['email' => 'user@example.com'],
-            [
-                'name' => 'Usuario Demo',
-                'password' => 'User1234!',
-                'role' => 'user',
-            ]
-        );
-
-        $this->command->info('Usuario normal creado o actualizado correctamente.');
-        $this->command->info('Email: user@example.com');
-        $this->command->info('Password: User1234!');
     }
 }
