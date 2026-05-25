@@ -14,16 +14,16 @@ class UserSeeder extends Seeder
     {
         // USUARIO ADMIN
         User::updateOrCreate(
-            ['email' => 'admin@example.com'], // clave única
+            ['email' => 'admin@prevendrive.com'], // clave única
             [
-                'name' => 'Administrador',
+                'name' => 'PrevenDrive',
                 'password' => 'Admin1234!', // El mutador de User se encargará de hashear la contraseña
                 'role' => 'admin',
             ]
         );
 
         $this->command->info('Usuario administrador creado o actualizado correctamente.');
-        $this->command->info('Email: admin@example.com');
+        $this->command->info('Email: admin@prevendrive.com');
         $this->command->info('Password: Admin1234!');
     }
 }
